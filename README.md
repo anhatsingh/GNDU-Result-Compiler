@@ -1,7 +1,7 @@
 # GNDU-Result-Compiler
 
-![Debug Status](https://github.com/anhatsingh/GNDU-Result-Compiler/actions/workflows/python-package2.yml/badge.svg)
-![Build Status](https://github.com/anhatsingh/GNDU-Result-Compiler/actions/workflows/python-package.yml/badge.svg)
+![Debug Status](https://github.com/anhatsingh/GNDU-Result-Compiler/actions/workflows/python-package2.yml/badge.svg?branch=v3)
+![Build Status](https://github.com/anhatsingh/GNDU-Result-Compiler/actions/workflows/python-package.yml/badge.svg?branch=v3)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Downloads](https://img.shields.io/badge/download-all%20releases-brightgreen.svg)](https://github.com/anhatsingh/GNDU-Result-Compiler/releases/)
