@@ -9,7 +9,14 @@
 ## About
 
 This package uses the `Python requests Library` and `Selenium Library`
-with **Google Sheets API v4** to compile marks of students of GNDU in Google Sheets
+with **Google Sheets API v4** to compile marks of students of GNDU in Google Sheets.
+
+## Changelog
+Version 3.x
+1. Implements `requests` library of python instead of `Selenium` library to get the results.
+2. Uses `MultiThreading` and `Queuing` to increase the speed of getting the results.
+3. Has a Time Reduction factor of 142.2 in comparison to Version 1.x
+
 
 The lead developer is Anhat Singh
 
