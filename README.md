@@ -29,7 +29,7 @@ Version 1.x
 
 The lead developer is Anhat Singh
 
-## Building / Installing Python-Auto-Attendance
+## Building / Installing GNDU-Result-Compiler
 
 ### Pre-Requisites
 1. Install the Python dependencies by running the following pip commands
@@ -39,7 +39,7 @@ The lead developer is Anhat Singh
 2. Use the included `chromedriver.exe` or download the latest one from [ChromeDriver - WebDriver for Chrome](https://chromedriver.chromium.org/) and keep it in the root directory.
 3. Follow bullet 3 and 4 of Prerequisites at [Google Sheets API v4 Guide](https://developers.google.com/sheets/api/quickstart/python) to create a Google Cloud Platform Project, enable Sheets API and get the Google `credentials.json` file to be put into the root directory.
 
-## Running Python-Auto-Attendance
+## Running GNDU-Result-Compiler
 
 * Simple run the following command:
     ```
