@@ -13,12 +13,10 @@
 
 ## About
 
-This package uses the **OCR engine** - `libtesseract` and a **command line program** - `tesseract`
-with **UB-Manheim** English train-data to mark attendance of Google Meet participants in Google Sheets
+This package uses the `Python requests Library` and `Selenium Library`
+with **Google Sheets API v4** to compile marks of students of GNDU in Google Sheets
 
 The lead developer is Anhat Singh
-
-This package uses various python libraries to take attendance effeciently and make google sheets using **Google Sheets API v4**
 
 ## Building / Installing Python-Auto-Attendance
 
@@ -37,7 +35,7 @@ This package uses various python libraries to take attendance effeciently and ma
     py app.py
     ```
 ### How to Use
-    After following all the steps given in Pre-requisites, open `app.py`, change the variables given according to your needs.
+After following all the steps given in Pre-requisites, open `app.py`, change the variables given according to your needs.
 
 ## License
 
