@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import os.path
+import os.path, random
 from datetime import datetime
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -13,9 +13,10 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 class googleAPI:
 
-    def __init__(self, sheetId):
+    def __init__(self, sheetId, sName = "Sheet1"):
         self.sheetID = sheetId
-        self.sheet = ""        
+        self.sheet = ""       
+        self.sName = sName 
 
     def setSheet(self, sheet):
         self.sheetID = sheet
@@ -141,7 +142,7 @@ class googleAPI:
 
         result = self.sheet.values().get(           # .get() method of sheets API gets the data from a certain range. Only non-empty rows and columns are returned
                 spreadsheetId = self.sheetID,       # the sheet to get data from
-                range = "Sheet1!A1:ZZ117"           # get All Data from a very large random range
+                range = self.sName + "!A1:ZZ117"           # get All Data from a very large random range
             ).execute()                             # execute the request using Google Sheets API
 
         rows = result.get('values', [])             # get the result obtained as an list of lists
@@ -180,8 +181,34 @@ class googleAPI:
     def getAllData(self):        
         result = self.sheet.values().get(           # .get() method of sheets API gets the data from a certain range. Only non-empty rows and columns are returned
                 spreadsheetId = self.sheetID,       # the sheet to get data from
-                range = "Sheet1!A1:ZZ10000"           # get All Data from a very large random range
+                range = self.sName + "!A1:ZZ10000"           # get All Data from a very large random range
             ).execute()                             # execute the request using Google Sheets API
 
         rows = result.get('values', [])             # get the result obtained as an list of lists
         return rows
+    
+    def add_sheet(self, sheet_name):
+        try:
+            request_body = {
+                'requests': [{
+                    'addSheet': {
+                        'properties': {
+                            'title': sheet_name,
+                            'tabColor': {
+                                'red': random.random(),
+                                'green': random.random(),
+                                'blue': random.random()
+                            }
+                        }
+                    }
+                }]
+            }
+
+            response = self.sheet.batchUpdate(
+                spreadsheetId=self.sheetID,
+                body=request_body
+            ).execute()
+
+            return response
+        except Exception as e:
+            print(e)
