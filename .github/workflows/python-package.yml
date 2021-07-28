@@ -1,4 +1,4 @@
-name: configuration for python env
+name: Debugging
 on: [push, pull_request]
 
 jobs:
