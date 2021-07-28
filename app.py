@@ -5,70 +5,71 @@ from main_processor import worker
 # ============================================ Data is here, change things here =================
 
 """
-roll_numbers_to_find: list<int>    --- Add custom roll numbers to crawl here
-year: int                       --- year of Result to find
-month: int                      --- month of Result to find
-course_code: int                 --- 1703 for CSE (A and B Section), 1702 for CE (C Section)
-semester: int                   --- semester number to find the result for
-initial_roll_number: int                    --- (First Roll Number of class) - 1
-total_students: int                   --- Total Number of students in class, set 0 if using custom
+ROLL_NUMS_TO_FIND: list<int>    --- Add custom roll numbers to crawl here
+YEAR: int                       --- YEAR of Result to find
+MONTH: int                      --- MONTH of Result to find
+COURSE_CODE: int                 --- 1703 for CSE (A and B Section), 1702 for CE (C Section)
+SEMESTER: int                   --- SEMESTER number to find the result for
+INITIAL_ROLL_NUM: int                    --- (First Roll Number of class) - 1
+TOTAL_STUDENTS: int                   --- Total Number of students in class, set 0 if using custom
                                     roll numbers, can use in addition to custom roll too
-subjects: list<str>       --- List of Subjects of the semester, Put them in order of
+SUBJECTS: list<str>       --- List of Subjects of the SEMESTER, Put them in order of
                                     the table given in Results Page of GNDU.
 
-google_sheet_title: str                         --- Google Sheets Title, where everything will be
+GOOGLE_SHEETS_TITLE: str                         --- Google Sheets Title, where everything will be
                                             uploaded to.
-existing_sheet_id: str/Bool    --- Google Sheets Unique Identifier of a sheet, if
+EXISTING_SHEET_ID: str/Bool    --- Google Sheets Unique Identifier of a sheet, if
                                             to upload in an existing sheet, else set to
                                             False to create a new Google Sheet
 
-gndu_url_form: str                    --- URL of the GNDU page where we fill the form to get
+GNDU_URL_FORM: str                    --- URL of the GNDU page where we fill the form to get
                                     the result.
-gndu_url_display: str                 --- URL of the GNDU page where the result is displayed
+GNDU_FORM_DISPLAY: str                 --- URL of the GNDU page where the result is displayed
                                     after filling the form and clicking on submit button
 
-size_of_thread: int                  --- The Maximum number of Roll number each thread can
+SIZE_OF_THREAD: int                  --- The Maximum number of Roll number each thread can
                                     process, the smaller, the faster.
 """
 
-roll_numbers_to_find = []
+ROLL_NUMS_TO_FIND = []
 
-year = 2020
-month = 12
-course_code = 1703
-semester = 1
-initial_roll_number = 17032000300
-total_students  = 116
-subjects = ["Mechanics", "EGD", "Physics", "Maths", "Material", "Punjabi", "Drug Abuse"]
+YEAR = 2020
+MONTH = 12
+COURSE_CODE = 1703
+SEMESTER = 1
+INITIAL_ROLL_NUM = 17032000300
+TOTAL_STUDENTS  = 116
+SUBJECTS = ["Mechanics", "EGD", "Physics", "Maths", "Material", "Punjabi", "Drug Abuse"]
 
-google_sheet_title = "Section A"
-existing_sheet_id = ''
+GOOGLE_SHEETS_TITLE = "Section A"
+EXISTING_SHEET_ID = ''
 
-gndu_url_form = 'https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULT.aspx'
-gndu_url_display = 'https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULTDISPLAY.aspx'
+GNDU_URL_FORM = 'https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULT.aspx'
+GNDU_FORM_DISPLAY = 'https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULTDISPLAY.aspx'
 
-size_of_thread = 2 # If you want to restrict by max_threads, uncomment the 2 lines below, and comment this one
-#max_threads = math.ceil(len(roll_numbers_to_find) / 2)
-#size_of_thread = math.ceil(len(roll_numbers_to_find) / max_threads)
+SIZE_OF_THREAD = 2 # If you want to restrict by max_threads, uncomment the 2 lines below,
+                   # and comment this one
+#max_threads = math.ceil(len(ROLL_NUMS_TO_FIND) / 2)
+#SIZE_OF_THREAD = math.ceil(len(ROLL_NUMS_TO_FIND) / max_threads)
 
 # ============================================ Do Not touch anything after this line =============
 
-for i in range(1,total_students+1):
-    roll_numbers_to_find.append(initial_roll_number+i)
+for each_stundent in range(1,TOTAL_STUDENTS+1):
+    ROLL_NUMS_TO_FIND.append(INITIAL_ROLL_NUM+each_stundent)
 
 data_to_send = { #post data
-     'DrpDwnyear': str(year),
-     'DrpDwnmonth': str(month),
+     'DrpDwnyear': str(YEAR),
+     'DrpDwnmonth': str(MONTH),
      'DropDownCourseType': 'C',
-     'DrpDwnCMaster': str(course_code), #change course here
-     'DrpDwnCdetail': str(semester) + '0' + str(course_code),    #change semester here
+     'DrpDwnCMaster': str(COURSE_CODE), #change course here
+     'DrpDwnCdetail': str(SEMESTER) + '0' + str(COURSE_CODE),    #change SEMESTER here
 }
 
 misc_functions = func()
-view_state = misc_functions.get_view_state(gndu_url_form, data_to_send)
+view_state = misc_functions.get_view_state(GNDU_URL_FORM, data_to_send)
 
 start_time = timeit.default_timer()
-number_of_threads = math.ceil(len(roll_numbers_to_find) / size_of_thread)
+number_of_threads = math.ceil(len(ROLL_NUMS_TO_FIND) / SIZE_OF_THREAD)
 threads = {}
 que = queue.Queue()
 count_of_roll_done = 0
@@ -76,16 +77,25 @@ count_of_roll_done = 0
 def do_count_roll():
     global count_of_roll_done
     count_of_roll_done += 1
-    print(str(count_of_roll_done) + "/" + str(total_students) + " Done")
+    print(str(count_of_roll_done) + "/" + str(TOTAL_STUDENTS) + " Done")
 
-for i in range(number_of_threads):
-    w = worker(i, subjects, data_to_send, view_state, lambda: do_count_roll())
-    rollForThisThread = [roll_numbers_to_find[(i*size_of_thread) + a] if (((i*size_of_thread) + a) < len(roll_numbers_to_find)) else None for a in range(size_of_thread)]    
-    threads[i] = threading.Thread(target=lambda q, arg1: q.put(w.startTheWork(arg1)), args=(que, [a for a in rollForThisThread if a!= None]))    
-    threads[i].start()    
+for thread_num in range(number_of_threads):
+    job_doer = worker(thread_num, SUBJECTS, data_to_send, view_state, lambda: do_count_roll())
+    roll_nums_for_this_thread = [
+        ROLL_NUMS_TO_FIND[(thread_num*SIZE_OF_THREAD) + a] 
+            if (((thread_num*SIZE_OF_THREAD) + a) < len(ROLL_NUMS_TO_FIND)) 
+            else None 
+            for a in range(SIZE_OF_THREAD)
+        ]    
+    threads[thread_num] = threading.Thread(
+        target=lambda q,
+        arg1: q.put(job_doer.startTheWork(arg1)),
+        args=(que, [a for a in roll_nums_for_this_thread if a!= None])
+        )    
+    threads[thread_num].start()    
     
-for i in range(number_of_threads):
-    threads[i].join()
+for thread_num in range(number_of_threads):
+    threads[thread_num].join()
 
 
 data_from_threads = []
@@ -95,7 +105,7 @@ while not que.empty():
     data_from_threads.extend(result[1])
     roll_num_not_found.extend(result[2])
 
-misc_functions.upload_to_google_sheets(data_from_threads, google_sheet_title, subjects, existing_sheet_id)
+misc_functions.upload_to_google_sheets(data_from_threads, GOOGLE_SHEETS_TITLE, SUBJECTS, EXISTING_SHEET_ID)
 
 total_time = timeit.default_timer() - start_time
 print("Time taken: " + str(total_time) + "s")
