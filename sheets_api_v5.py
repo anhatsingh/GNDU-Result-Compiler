@@ -13,13 +13,17 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 class googleAPI:
 
-    def __init__(self, sheetId, sName = "Sheet1"):
+    def __init__(self, sheetId, sName = "Sheet1", gid = 0):
         self.sheetID = sheetId
         self.sheet = ""       
-        self.sName = sName 
+        self.sName = sName
+        self.gid = gid
 
     def setSheet(self, sheet):
         self.sheetID = sheet
+    
+    def setGid(self, gid):
+        self.gid = gid
 
     # ==================================================================================================================================
     # connectToGoogle() method returns <void>
@@ -78,7 +82,7 @@ class googleAPI:
                 {
                     "autoResizeDimensions": {
                         "dimensions": {
-                        "sheetId": 0,
+                        "sheetId": self.gid,
                         "dimension": "COLUMNS",
                         "startIndex": 0,
                         "endIndex": len(values[0])
@@ -209,6 +213,8 @@ class googleAPI:
                 body=request_body
             ).execute()
 
-            return response
+            #return response
+
+            return response['replies'][0]['addSheet']['properties']['sheetId'] if (response['replies'][0]) else response
         except Exception as e:
             print(e)
