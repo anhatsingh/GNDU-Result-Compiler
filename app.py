@@ -30,7 +30,7 @@ totalStu  = 116
 listOfSubjects = ["Mechanics", "EGD", "Physics", "Maths", "Material", "Punjabi", "Drug Abuse"]
 
 sheetTitle = "Section A"
-addIntoExistingSheetWithID = '1ux3zsZVxWRuzm-xCqmRLLHx767Lr92n4gDTBVJ9lCHI'
+addIntoExistingSheetWithID = ''
 
 formUrl = 'https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULT.aspx'
 displayUrl = 'https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULTDISPLAY.aspx'
