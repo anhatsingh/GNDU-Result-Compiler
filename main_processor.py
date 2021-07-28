@@ -1,6 +1,6 @@
 import requests, sys, time, timeit, traceback
 from seleniumManager.manager import Manager
-from sheets_api_v5 import googleAPI
+from sheets_api_v5 import GoogleAPI
 from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 
@@ -8,66 +8,66 @@ class misc:
     def __init__(self):
         pass
 
-    def getViewState(self, formUrl, postData):
+    def get_view_state(self, gndu_url_form, data_to_send):
         try:
-            si = Manager(r'chromedriver.exe')
-            d = si.driver()
-            d.get(formUrl)
+            selenium_instance = Manager(r'chromedriver.exe')
+            driver = selenium_instance.driver()
+            driver.get(gndu_url_form)
             time.sleep(3)
-            for i in postData:
-                Select(d.find_element_by_id(i)).select_by_value(postData[i])
+            for i in data_to_send:
+                Select(driver.find_element_by_id(i)).select_by_value(data_to_send[i])
                 time.sleep(2)
             
-            vs = d.find_element_by_id("__VIEWSTATE").get_attribute("value")
-            d.close()
-            return vs  
+            view_state_string = driver.find_element_by_id("__view_state").get_attribute("value")
+            driver.close()
+            return view_state_string
         except Exception as e:
             print(e)
-            sys.exit("could not get ViewState, please try again")
+            sys.exit("could not get view_state, please try again")
 
-    def uploadToGoogle(self, sData, sheetTitle, listOfSubjects, oldSheet = False):
+    def upload_to_google_sheets(self, data_to_upload, google_sheet_title, subjects, old_sheet_id = False):
         try:            
-            if(not oldSheet):
-                api = googleAPI("")
-                api.connectToGoogle()
-                api.setSheet(api.createSpreadsheet(sheetTitle))
-                sName = "Sheet1"
+            if(not old_sheet_id):
+                api = GoogleAPI("")
+                api.connect_to_google()
+                api.setSheet(api.create_spreadsheet(google_sheet_title))
+                sheet_title = "Sheet1"
             else:
-                api = googleAPI(oldSheet, sheetTitle)
-                api.connectToGoogle()
-                api.setGid(api.add_sheet(sheetTitle))
-                sName = sheetTitle
+                api = GoogleAPI(old_sheet_id, google_sheet_title)
+                api.connect_to_google()
+                api.setGid(api.add_sheet(google_sheet_title))
+                sheet_title = google_sheet_title
 
             row1 = ["Roll No.", "Name", "Registration Number", "Supply", "SGPA", "CGPA"]
             row2 = ["", "", "", "", "", ""]
-            for i in listOfSubjects:
+            for i in subjects:
                 row1.extend(["", i, ""])
                 row2.extend(["Credits", "Grade", "Grade Point"])
             row1.extend(["Grade Point Total", "Credits Earned", "Total Credits"])
             row2.extend(["", "", ""])
 
-            finData = [
+            final_data_to_upload = [
                 row1,
                 row2,
             ]
-            finData.extend(sData)
-            api.updateSheet("'"+sName+"'!A1:" + api.getLetter(len(row1) - 1) + str(len(finData)), finData)
+            final_data_to_upload.extend(data_to_upload)
+            api.update_sheet("'"+sheet_title+"'!A1:" + api.get_column_letter(len(row1) - 1) + str(len(final_data_to_upload)), final_data_to_upload)
             return True
         except:
             return False
 
 class worker:
-    def __init__(self, thread, subjects, postData, viewState, doCount):
+    def __init__(self, thread, subjects, data_to_send, view_state, count_roll):
         self.thread = thread
         self.subjects = subjects
-        self.postData = postData
-        self.viewState = viewState
-        self.doCount = doCount
+        self.data_to_send = data_to_send
+        self.view_state = view_state
+        self.count_roll = count_roll
 
-    def startTheWork(self, rollToCrawl):
-        finalData = []
-        errorRoll = []        
-        for a in rollToCrawl:            
+    def startTheWork(self, roll_nums):
+        final_data_of_thread = []
+        roll_num_not_found = []        
+        for a in roll_nums:            
             try:                
                 #print("Thread " + str(self.thread) + ", Getting " + str(a))
 
@@ -78,44 +78,44 @@ class worker:
                 sess = requests.session()
                 sess.headers.update(headers)
 
-                g,s,t = self.fetchMarks(a, sess)
+                general,subject_data, totals = self.get_marks_single(a, sess)
 
-                stu = [g["rollNo"], g["name"], g["regnNo"], g["supply"], t["SGPA"], t["CGPA"]]
-                for i in s:
-                    stu.append(s[i]["credits"])
-                    stu.append(s[i]["grade"])
-                    stu.append(s[i]["gradePoint"])
-                stu.extend([t["gradpoint"], t["credsEar"], t["credsReg"]])
+                stu = [general["rollNo"], general["name"], general["regnNo"], general["supply"], totals["SGPA"], totals["CGPA"]]
+                for i in subject_data:
+                    stu.append(subject_data[i]["credits"])
+                    stu.append(subject_data[i]["grade"])
+                    stu.append(subject_data[i]["gradePoint"])
+                stu.extend([totals["gradpoint"], totals["credsEar"], totals["credsReg"]])
 
-                finalData.append(stu)                
+                final_data_of_thread.append(stu)                
 
             except Exception as e:                    
                 #print(traceback.format_exc())
                 #print("Unable to fetch " + str(a))
-                errorRoll.append(a)
-                finalData.append([a, "N/A"])
+                roll_num_not_found.append(a)
+                final_data_of_thread.append([a, "N/A"])
             
-            self.doCount()
+            self.count_roll()
                 
-        return [self.thread, finalData, errorRoll]
+        return [self.thread, final_data_of_thread, roll_num_not_found]
 
-    def fetchMarks(self, RollNo, session):
+    def get_marks_single(self, roll_num, session):
         data = {
-                'textboxRno': RollNo,
+                'textboxRno': roll_num,
                 'buttonShowResult': 'Submit',
 
                 '__EVENTTARGET': '',
                 '__EVENTARGUMENT': '',
                 '__LASTFOCUS': '',
-                '__VIEWSTATE': self.viewState,
-                '__VIEWSTATEGENERATOR': '72A7EE3D',
+                '__view_state': self.view_state,
+                '__view_stateGENERATOR': '72A7EE3D',
         }
 
-        newData = self.postData | data
-        r = session.post('https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULT.aspx', data=newData)
-        r = session.get('https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULTDISPLAY.aspx')
+        new_data_to_send = self.data_to_send | data
+        response = session.post('https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULT.aspx', data=new_data_to_send)
+        response = session.get('https://collegeadmissions.gndu.ac.in/studentArea/GNDUEXAMRESULTDISPLAY.aspx')
 
-        soup = BeautifulSoup(r.text, features="lxml")
+        soup = BeautifulSoup(response.text, features="lxml")
         b = soup.select('#form1')[0]
         table2 = b.find_all("table")[1]
         table3 = b.find_all("table")[2]
@@ -123,12 +123,12 @@ class worker:
         tab2_tr = table2.find_all("tr")
         tab3_tr = table3.find_all("tr")
 
-        theGeneralData = {}
+        general_data = {}
 
-        theGeneralData['rollNo'] = soup.select('#form1 > center > table > span:nth-child(3) > tr:nth-child(1) > td:nth-child(1) > b:nth-child(1)')[0].getText()
-        theGeneralData['regnNo'] = soup.select('#form1 > center > table > span:nth-child(3) > tr:nth-child(1) > td:nth-child(2) > b:nth-child(1)')[0].getText()
-        theGeneralData['name']   = soup.select('#form1 > center > table > span:nth-child(3) > tr:nth-child(2) > td:nth-child(1) > b:nth-child(2)')[0].getText()
-        theGeneralData['supply'] = soup.select('#form1 > center > table > span:nth-child(3) > tr:nth-child(2) > td:nth-child(2) > b:nth-child(1)')[0].getText()
+        general_data['rollNo'] = soup.select('#form1 > center > table > span:nth-child(3) > tr:nth-child(1) > td:nth-child(1) > b:nth-child(1)')[0].getText()
+        general_data['regnNo'] = soup.select('#form1 > center > table > span:nth-child(3) > tr:nth-child(1) > td:nth-child(2) > b:nth-child(1)')[0].getText()
+        general_data['name']   = soup.select('#form1 > center > table > span:nth-child(3) > tr:nth-child(2) > td:nth-child(1) > b:nth-child(2)')[0].getText()
+        general_data['supply'] = soup.select('#form1 > center > table > span:nth-child(3) > tr:nth-child(2) > td:nth-child(2) > b:nth-child(1)')[0].getText()
 
         totals = {}
         totals['credsReg'] = tab3_tr[0].find_all("td")[1].find_all("b")[0].text
@@ -137,15 +137,15 @@ class worker:
         totals['SGPA']      = tab3_tr[2].find_all("td")[1].find_all("b")[0].text
         totals['CGPA']      = tab3_tr[3].find_all("td")[1].find_all("b")[0].text
         
-        subjectData = {}
+        subject_data = {}
         for i in self.subjects:
-            subjectData[i] = {'credits' : '', 'grade' : '', 'gradePoint': ''}  
+            subject_data[i] = {'credits' : '', 'grade' : '', 'gradePoint': ''}  
             
         a = 0
-        for i in subjectData:
-            subjectData[i]["credits"]      = tab2_tr[a+1].find_all("td")[5].getText().strip()
-            subjectData[i]["grade"]        = tab2_tr[a+1].find_all("td")[6].getText().strip()
-            subjectData[i]["gradePoint"]   = tab2_tr[a+1].find_all("td")[7].getText().strip()
+        for i in subject_data:
+            subject_data[i]["credits"]      = tab2_tr[a+1].find_all("td")[5].getText().strip()
+            subject_data[i]["grade"]        = tab2_tr[a+1].find_all("td")[6].getText().strip()
+            subject_data[i]["gradePoint"]   = tab2_tr[a+1].find_all("td")[7].getText().strip()
             a += 1
 
-        return theGeneralData, subjectData, totals
+        return general_data, subject_data, totals

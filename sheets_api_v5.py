@@ -11,22 +11,22 @@ from google.oauth2.credentials import Credentials
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-class googleAPI:
+class GoogleAPI:
 
-    def __init__(self, sheetId, sName = "Sheet1", gid = 0):
-        self.sheetID = sheetId
+    def __init__(self, sheet_id, sheet_title = "Sheet1", gid = 0):
+        self.sheet_id = sheet_id
         self.sheet = ""       
-        self.sName = sName
+        self.sheet_title = sheet_title
         self.gid = gid
 
     def setSheet(self, sheet):
-        self.sheetID = sheet
+        self.sheet_id = sheet
     
     def setGid(self, gid):
         self.gid = gid
 
     # ==================================================================================================================================
-    # connectToGoogle() method returns <void>
+    # connect_to_google() method returns <void>
     # This method connects to google using OAuth2.0, get the google sheet we need to work on.
     # Do not edit the things in this method, I copy-pasted from someone else's example, as I
     # did not want to open my code to security loopholes.
@@ -35,7 +35,7 @@ class googleAPI:
     # To get the file, follow the steps in pre-requisites at https://developers.google.com/sheets/api/quickstart/python    
     # ==================================================================================================================================
 
-    def connectToGoogle(self):       
+    def connect_to_google(self):       
         creds = None
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
@@ -60,11 +60,11 @@ class googleAPI:
         self.sheet = service.spreadsheets() # this might give error in Visual Studio, ignore it, it works perfectly.
 
     # ==================================================================================================================================
-    # updateSheet() method returns <int> "number of rows updated"
+    # update_sheet() method returns <int> "number of rows updated"
     # This method requires 2 parameters to call, "range" and "values".
     # This simply adds/updates cells of Range passed in "range" parameter, with values passed using "values" parameter.
     # ==================================================================================================================================
-    def updateSheet(self, range, values):
+    def update_sheet(self, range, values):
         body = {
             'values': values       # this can have additional options to edit how data is being uploaded, I am using no special params
         }
@@ -77,7 +77,7 @@ class googleAPI:
         
 
 
-        requestBody = {
+        request_body = {
             "requests": [
                 {
                     "autoResizeDimensions": {
@@ -91,10 +91,10 @@ class googleAPI:
                 }
             ]
         }
-        response = self.sheet.batchUpdate(spreadsheetId=self.sheetID, body=requestBody).execute()
+        response = self.sheet.batchUpdate(spreadsheetId=self.sheetID, body=request_body).execute()
 
-        rowsAffected = result.get('updatedCells')   # get the number of Rows affected, just to verify, that something has changed in sheets.
-        return rowsAffected                         # return this number of rows back.
+        rows_affected = result.get('updatedCells')   # get the number of Rows affected, just to verify, that something has changed in sheets.
+        return rows_affected                         # return this number of rows back.
 
     # ==================================================================================================================================
     # getColumnToAddTo() method returns <string> "Columns To Add Data To"
@@ -142,37 +142,37 @@ class googleAPI:
     # I can only get two lettered columns max i.e. upto "ZZ" or upto N = 26*26 = 676
     # ==================================================================================================================================
 
-    def getCoulumnToAddTo(self):        
+    def get_column_to_add_to(self):        
 
         result = self.sheet.values().get(           # .get() method of sheets API gets the data from a certain range. Only non-empty rows and columns are returned
                 spreadsheetId = self.sheetID,       # the sheet to get data from
-                range = self.sName + "!A1:ZZ117"           # get All Data from a very large random range
+                range = self.sheet_title + "!A1:ZZ117"           # get All Data from a very large random range
             ).execute()                             # execute the request using Google Sheets API
 
         rows = result.get('values', [])             # get the result obtained as an list of lists
         
         if(len(rows) > 0):
-            numberOfColumnsFilled = len(rows[0])        # get the first array from the list of lists
+            num_of_col_filled = len(rows[0])        # get the first array from the list of lists
         else:
-            numberOfColumnsFilled = 0
+            num_of_col_filled = 0
 
-        emptyColumn = self.getLetter(numberOfColumnsFilled)        
+        empty_column = self.get_column_letter(num_of_col_filled)        
 
-        return emptyColumn                          # return the column to be updated.
+        return empty_column                          # return the column to be updated.
     
 
-    def getLetter(self, number):        
-        listOfAlphabets = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")    # make a list of aplhabets.
+    def get_column_letter(self, number):        
+        alphabets = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")    # make a list of aplhabets.
         if(number >= 26):            
-            theLetter = self.getLetter(int(number/26) - 1)
+            alphabet = self.get_column_letter(int(number/26) - 1)
             number = int(number%26)
         else:
-            theLetter = ""        
-        theLetter = theLetter + listOfAlphabets[(number%26)]
-        return theLetter
+            alphabet = ""        
+        alphabet = alphabet + alphabets[(number%26)]
+        return alphabet
 
     
-    def createSpreadsheet(self, title):
+    def create_spreadsheet(self, title):
         spreadsheet = {
             'properties': {
                 'title': title
@@ -182,10 +182,10 @@ class googleAPI:
         return spreadsheet.get('spreadsheetId')
 
 
-    def getAllData(self):        
+    def get_all_data(self):        
         result = self.sheet.values().get(           # .get() method of sheets API gets the data from a certain range. Only non-empty rows and columns are returned
                 spreadsheetId = self.sheetID,       # the sheet to get data from
-                range = self.sName + "!A1:ZZ10000"           # get All Data from a very large random range
+                range = self.sheet_title + "!A1:ZZ10000"           # get All Data from a very large random range
             ).execute()                             # execute the request using Google Sheets API
 
         rows = result.get('values', [])             # get the result obtained as an list of lists
