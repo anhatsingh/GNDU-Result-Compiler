@@ -17,6 +17,10 @@ Version 3.x
 2. Uses `MultiThreading` and `Queuing` to increase the speed of getting the results.
 3. Has a Time Reduction factor of 142.2 in comparison to Version 1.x
 
+Version 2.x
+1. Implements `Selenium` library with the support of `MultiThreading` to get the results.
+2. Has a better overall organisation of code in comparison to Version 1.x
+3. Has a Time Reduction Factor of 4.1 in comparison to Version 1.x
 
 The lead developer is Anhat Singh
 
